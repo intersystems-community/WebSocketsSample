@@ -96,38 +96,38 @@ Authenticates user, checks that he has required resource.
 If all goes well, initialises sensors and forwards users' input to Choose Action]]></Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set status=..Write("Server start at "_$ZTIMESTAMP)
+	set status=..Write("Server start at "_$ZTIMESTAMP)
 	if $$$ISOK(..RequireAuthorization()) 
 	{		
-   		For  
-   		{
-      		Set data=..Read(, .status, ..#Timeout)
-			If $$$ISERR(status) 
-			{
-				If $$$GETERRORCODE(status) = $$$CSPWebSocketClosed 
-				{
-					Set status=..Write($System.Status.GetErrorText(status))
-				}
-				If $$$GETERRORCODE(status) = $$$CSPWebSocketTimeout 
-				{
-     	   	     	Set status=..Write("Server timed-out at "_$ZTIMESTAMP)
-     	   		}
-      		} else 
-      		{
-     		    do ..ClientLoop(data)
-     	 	}
-   		}	
+		do ..ClientLoop()
 	} else {
-		Set status=..EndServer()
-   		Quit $$$OK					
+		set status=..EndServer()
+   		quit $$$OK					
 	}
 ]]></Implementation>
 </Method>
 
 <Method name="ClientLoop">
-<FormalSpec>data</FormalSpec>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	Set status=..Write(data)
+<Implementation><![CDATA[
+	For  {
+		Set data=..Read(, .status, ..#Timeout)
+		If $$$ISERR(status) 
+		{
+			If $$$GETERRORCODE(status) = $$$CSPWebSocketClosed 
+			{
+				Set status=..Write($System.Status.GetErrorText(status))
+			}
+			If $$$GETERRORCODE(status) = $$$CSPWebSocketTimeout 
+			{
+	   	     	Set status=..Write("Server timed-out at "_$ZTIMESTAMP)
+	   		}
+		} else 
+		{
+	  		
+		    Set status=..Write(data)
+	 	}
+   	}
 ]]></Implementation>
 </Method>
 
