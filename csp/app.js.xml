@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<CSP name="app.js" application="/csp/websocketssample/" default="1"><![CDATA[
+function doFunction(WebSocket, User, Password) {
+	console.log(WebSocket, User, Password);
+}]]></CSP>
+</Export>

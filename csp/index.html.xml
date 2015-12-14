@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<CSP name="index.html" application="/csp/websocketssample/" default="1"><![CDATA[
+<html>
+	<head>
+	<title>WebSocket Sample</title>
+		<script type="text/javascript" src="app.js"></script>
+	</head>
+
+	<body>
+		<div id="content">
+			<form onsubmit="javascript:doFunction(WebSocket.value, User.value, Password.value); return false;"> <!-- return false; so action property does not get executed -->
+				WebSocket:<br>
+ 				<input type="text" id="WebSocket"  name="WebSocket" value="localhost:57772/csp/websocketssample/WebSockets.Main.cls"><br>
+ 				User:<br>
+ 				<input type="text" id="User" name="User" value="dev"><br>
+ 				Password:<br>
+ 				<input type="text" id="Password" name="Password" value="123"><br>
+				<input id="clickMe" type="submit" value="clickme" />
+			</form>	
+	 	</div>
+	</body>
+</html>
+]]></CSP>
+</Export>
