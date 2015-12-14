@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WebSockets.Main">
+<Super>%CSP.WebSocket</Super>
+<TimeCreated>63900,30560.372348</TimeCreated>
+
+<Parameter name="Timeout">
+<Description>
+How long to wait for user when connection established</Description>
+<Default>3600</Default>
+</Parameter>
+
+<Parameter name="AuthorizationTimeout">
+<Description>
+How long to wait for authorization key when connection established</Description>
+<Default>3600</Default>
+</Parameter>
+
+<Parameter name="Buffer">
+<Description>
+Buffer size in bytes</Description>
+<Default>8192</Default>
+</Parameter>
+
+<Method name="OnPreServer">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPostServer">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="RequireAuthorization">
+<Description><![CDATA[
+Holds process and expects only one package from the client,<br>
+containing Username and password in JSON format. <br>
+Example : {User:"_SYSTEM",Password:"sys"}]]></Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set status=..Write("Wait auth "_$ZTIMESTAMP)
+	set authObj = ..Read(,.status,..#AuthorizationTimeout) // wait for package
+	set loginStatus = ##class(%SYSTEM.Security).Login(authObj.User,authObj.Password) // login user
+	quit loginStatus
+]]></Implementation>
+</Method>
+
+<Method name="Read">
+<Description>
+Reads up to len characters from the client.
+If the call is successful the status (sc) will be returned as $$$OK, otherwise an error code of $$$CSPWebSocketTimeout 
+indicates a timeout and $$$CSPWebSocketClosed indicates that the client has terminated the WebSocket.
+Converts results into json
+Closes connection if received incorrect json</Description>
+<FormalSpec><![CDATA[&len:%Integer=32656,&sc:%Status,timeout:%Integer=86400]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set json = ##super(len, .sc, timeout)
+	do:$$$ISERR(sc) ..EndServer()
+	set st = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(json,,.obj,1)
+	do:$$$ISERR(st) ..EndServer()
+	quit obj
+]]></Implementation>
+</Method>
+
+<Method name="Write">
+<Description><![CDATA[
+Write to the client.
+If <var>data</var> is object - outputs JSON.
+If <var>data</var> is string - wraps it as JSON { "Data" : data }.]]></Description>
+<FormalSpec>data:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if $isobject(data) {
+		if data.%IsA("%ZEN.proxyObject") {
+			set data = ..OutputToStr(data,"%ToJSON")
+		} else {
+			set data = ..OutputToStr("%ZEN.Auxiliary.jsonProvider","%ObjectToJSON",data)					
+		}
+	} else {
+		//#include %ZEN.Utils
+		Set data = "{""Data"":"""_$Replace(data,"\'","'")_"""}"
+	}
+	do ##super(data)
+	return 1
+]]></Implementation>
+</Method>
+
+<Method name="Server">
+<Description><![CDATA[
+Main method. <br>
+Authenticates user, checks that he has required resource.
+If all goes well, initialises sensors and forwards users' input to Choose Action]]></Description>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set status=..Write("Server start at "_$ZTIMESTAMP)
+	if $$$ISOK(..RequireAuthorization()) 
+	{		
+   		For  
+   		{
+      		Set data=..Read(, .status, ..#Timeout)
+			If $$$ISERR(status) 
+			{
+				If $$$GETERRORCODE(status) = $$$CSPWebSocketClosed 
+				{
+					Set status=..Write($System.Status.GetErrorText(status))
+				}
+				If $$$GETERRORCODE(status) = $$$CSPWebSocketTimeout 
+				{
+     	   	     	Set status=..Write("Server timed-out at "_$ZTIMESTAMP)
+     	   		}
+      		} else 
+      		{
+     		    do ..ClientLoop(data)
+     	 	}
+   		}	
+	} else {
+		Set status=..EndServer()
+   		Quit $$$OK					
+	}
+]]></Implementation>
+</Method>
+
+<Method name="ClientLoop">
+<FormalSpec>data</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	Set status=..Write(data)
+]]></Implementation>
+</Method>
+
+<Method name="OutputToStr">
+<Description><![CDATA[
+Executes actions and returns device output <br>
+pObj - OREF or class<br>
+pMethod - instance or class method to execute respectively<br>
+pArgs - additional arguments]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pObj,pMethod,pArgs...</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set str=""
+
+	//Redirect IO to the current routine - makes use of the labels defined below
+	use $io::("^"_$ZNAME)
+	
+	//Enable redirection
+	do ##class(%Device).ReDirectIO(1)
+	
+	if $isobject(pObj) {
+		do $Method(pObj,pMethod,pArgs...)
+	} elseif $$$comClassDefined(pObj) {
+		do $ClassMethod(pObj,pMethod,pArgs...)
+	}
+	
+    //Disable redirection
+    do ##class(%Device).ReDirectIO(0)
+
+    quit str	  
+
+    //Labels that allow for IO redirection
+    //Read Character - we don't care about reading
+rchr(c)      quit
+    //Read a string - we don't care about reading
+rstr(sz,to)  quit
+    //Write a character - call the output label
+wchr(s)      do output($char(s))  quit
+    //Write a form feed - call the output label
+wff()        do output($char(12))  quit
+    //Write a newline - call the output label
+wnl()        do output($char(13,10))  quit
+    //Write a string - call the output label
+wstr(s)      do output(s)  quit
+    //Write a tab - call the output label
+wtab(s)      do output($char(9))  quit
+    //Output label - this is where you would handle what you actually want to do.
+    //  in our case, we want to write to str
+output(s)    set str=str_s   quit
+]]></Implementation>
+</Method>
+</Class>
+</Export>
