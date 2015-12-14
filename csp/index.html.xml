@@ -18,10 +18,10 @@
  				<input type="text" id="PasswordId" name="Password" value="123"><br>
 				<input id="InitButton" type="button" value="Start WebSocket" onclick="InitSocket(WebSocketId.value, UserId.value, PasswordId.value);" />
 			</form>
-			<form> <!-- Init Web Socket Form -->
+			<form> <!-- Send Echo Request Form -->
 				Echo:<br>
  				<input type="text" id="EchoId"  name="Echo" value="Text"><br>
-				<input id="EchoButton" type="button" value="clickme" onclick="Echo(EchoId.value);" />
+				<input id="EchoButton" type="button" value="clickme" onclick="window.Echo(EchoId.value);" />
 			</form>	
 	 	</div>
 	</body>

@@ -12,13 +12,13 @@ function InitSocket(WebSocketId, UserId, PasswordId) {
 	setTimeout(function() {
 		socket.send(JSON.stringify(auth));
 	},1000); // we need to wait before connection is established
-};
+}
 
 function Echo(Text) {
-	var echo = {Action:"Echo", Arguments: Text};
+	var echo = { "Action":"Echo", "Arguments": Text};
 	socket.send(JSON.stringify(echo));
 		
-};
+}
 
 ]]></CSP>
 </Export>
