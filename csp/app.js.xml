@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <CSP name="app.js" application="/csp/websocketssample/" default="1"><![CDATA[
-function doFunction(WebSocket, User, Password) {
-	console.log(WebSocket, User, Password);
-}]]></CSP>
+function InitSocket(WebSocketId, UserId, PasswordId) {
+	socket = new WebSocket("ws://"+WebSocketId); // "ws://localhost:57772/csp/websocketssample/WebSockets.Main.cls"
+	socket.onmessage = function(msg){
+		console.log(msg.data);
+	};
+
+	var auth = { "User": UserId, "Password": PasswordId};
+	
+	setTimeout(function() {
+		socket.send(JSON.stringify(auth));
+	},1000); // we need to wait before connection is established
+};
+
+function Echo(Text) {
+	var echo = {Action:"Echo", Arguments: Text};
+	socket.send(JSON.stringify(echo));
+		
+};
+
+]]></CSP>
 </Export>
