@@ -58,7 +58,7 @@ function Disconnect() {
 		console.log(msg.data);
 	};
 	
-	// disable buttons after login
+	// disable buttons after logout
 	document.getElementById('EchoButton').disabled=true;
 	document.getElementById('GetVarButton').disabled=true;
 	document.getElementById('SetVarButton').disabled=true;
