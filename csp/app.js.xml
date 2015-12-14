@@ -16,6 +16,9 @@ function InitSocket(WebSocketId, UserId, PasswordId) {
 		document.getElementById('EchoButton').disabled=false;
 		document.getElementById('GetVarButton').disabled=false;
 		document.getElementById('SetVarButton').disabled=false;
+		document.getElementById('DisconnectButton').disabled=false;
+		
+		document.getElementById('InitButton').disabled=true;
 	},1000); 
 }
 
@@ -46,6 +49,22 @@ function SetVar(Var, Val) {
 		console.log(msg.data);
 	};
 	socket.send(JSON.stringify(set));		
+}
+
+function Disconnect() {
+	socket.close();
+
+	socket.onmessage = function(msg){
+		console.log(msg.data);
+	};
+	
+	// disable buttons after login
+	document.getElementById('EchoButton').disabled=true;
+	document.getElementById('GetVarButton').disabled=true;
+	document.getElementById('SetVarButton').disabled=true;
+	document.getElementById('DisconnectButton').disabled=true;
+	
+	document.getElementById('InitButton').disabled=false;	
 }
 
 ]]></CSP>

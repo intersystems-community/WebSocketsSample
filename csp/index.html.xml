@@ -41,6 +41,10 @@
 				<input id="SetVarButton" type="button" value="Set Var value" onclick="window.SetVar(SetVarId.value, SetValId.value);" disabled="true"/>
 			</form>	
 			<hr>
+			<form> <!-- Disconnect Form -->
+				<input id="DisconnectButton" type="button" value="Disconnect" onclick="window.Disconnect();" disabled="true"/>
+			</form>	
+			<hr>
 	 	</div>
 	</body>
 </html>
