@@ -98,7 +98,8 @@ If all goes well, initialises sensors and forwards users' input to Choose Action
 <Implementation><![CDATA[
 	set status=..Write("Server start at "_$ZTIMESTAMP)
 	if $$$ISOK(..RequireAuthorization()) 
-	{		
+	{	
+		set status=..Write("Auth success at "_$ZTIMESTAMP)	
 		do ..ClientLoop()
 	} else {
 		set status=..EndServer()
@@ -108,26 +109,56 @@ If all goes well, initialises sensors and forwards users' input to Choose Action
 </Method>
 
 <Method name="ClientLoop">
-<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	For  {
-		Set data=..Read(, .status, ..#Timeout)
-		If $$$ISERR(status) 
-		{
-			If $$$GETERRORCODE(status) = $$$CSPWebSocketClosed 
-			{
-				Set status=..Write($System.Status.GetErrorText(status))
-			}
-			If $$$GETERRORCODE(status) = $$$CSPWebSocketTimeout 
-			{
-	   	     	Set status=..Write("Server timed-out at "_$ZTIMESTAMP)
-	   		}
-		} else 
-		{
-	  		
-		    Set status=..Write(data)
+		Set data=..Read(, .st, ..#Timeout)
+	    Set st=..Action(data)
+	    If $$$ISERR(st) {
+		    Set st=..Write("Error "_$System.Status.GetErrorText(st))
 	 	}
    	}
+]]></Implementation>
+</Method>
+
+<Method name="Action">
+<Description><![CDATA[
+Execute singular action
+<var>obj</var> is an object with Action property and additional arguments in Arguments property]]></Description>
+<FormalSpec>obj:%ZEN.proxyObject</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set action =obj.Action
+	if action = "Echo" {
+		set st=..Write(obj.Arguments)
+	} elseif action = "SetVar" {
+		set st=..SetVar(obj.Arguments.Var, obj.Arguments.Val)
+	} elseif action = "GetVar" {
+		set st=..GetVar(obj.Arguments.Var)
+	} else {
+		set st=..Write("Unknown action")
+	}
+	quit st
+]]></Implementation>
+</Method>
+
+<Method name="SetVar">
+<Description><![CDATA[
+Set <var>Var</var> to <var>Val</var>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Var,Val</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set @Var = Val
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetVar">
+<Description><![CDATA[
+Get <var>Var</var> value]]></Description>
+<FormalSpec>Var</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[	quit ..Write($g(@Var))
 ]]></Implementation>
 </Method>
 
