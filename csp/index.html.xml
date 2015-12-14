@@ -18,11 +18,29 @@
  				<input type="text" id="PasswordId" name="Password" value="123"><br>
 				<input id="InitButton" type="button" value="Start WebSocket" onclick="InitSocket(WebSocketId.value, UserId.value, PasswordId.value);" />
 			</form>
+			<hr>
 			<form> <!-- Send Echo Request Form -->
 				Echo:<br>
  				<input type="text" id="EchoId"  name="Echo" value="Text"><br>
-				<input id="EchoButton" type="button" value="clickme" onclick="window.Echo(EchoId.value);" />
+				<input id="EchoButton" type="button" value="Send Echo" onclick="window.Echo(EchoId.value);" disabled="true"/> <!-- Does not work without window-->
+				<label id="EchoResult"></label>
 			</form>	
+			<hr>
+			<form> <!-- Get Var Form -->
+				Var:<br>
+ 				<input type="text" id="VarId"  name="Var" value="a"><br>
+				<input id="GetVarButton" type="button" value="Get Var value" onclick="window.GetVar(VarId.value);" disabled="true"/>
+				<label id="GetVarResult"></label>
+			</form>	
+			<hr>
+			<form> <!-- Set Var Form -->
+				Var:<br>
+ 				<input type="text" id="SetVarId"  name="Var" value="a"><br>
+ 				Val:<br>
+ 				<input type="text" id="SetValId"  name="Val" value="123"><br>
+				<input id="SetVarButton" type="button" value="Set Var value" onclick="window.SetVar(SetVarId.value, SetValId.value);" disabled="true"/>
+			</form>	
+			<hr>
 	 	</div>
 	</body>
 </html>
