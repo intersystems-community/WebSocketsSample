@@ -7,7 +7,7 @@
 		<script type="text/javascript" src="app.js"></script>
 	</head>
 
-	<body>
+	<body onload="SetWebSocketAddress();">
 		<div id="content">
 			<form> <!-- Init Web Socket Form -->
 				WebSocket:<br>

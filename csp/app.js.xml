@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="25">
 <CSP name="app.js" application="/csp/websocketssample/" default="1"><![CDATA[
+function SetWebSocketAddress() {
+	var url = window.location.href;
+	var noprotocol = url.replace('http://','').replace('https://','');
+	var noindex = noprotocol.replace('index.html','');
+	var finalws = noindex + "WebSockets.Main.cls";
+	document.getElementById('WebSocketId').value = finalws;
+}
+
 function InitSocket(WebSocketId, UserId, PasswordId) {
 	socket = new WebSocket("ws://"+WebSocketId); // "ws://localhost:57772/csp/websocketssample/WebSockets.Main.cls"
 	socket.onmessage = function(msg){
