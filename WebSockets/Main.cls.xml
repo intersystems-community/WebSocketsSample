@@ -41,10 +41,10 @@ containing Username and password in JSON format. <br>
 Example : {User:"_SYSTEM",Password:"sys"}]]></Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set status=..Write("Wait auth "_$ZTIMESTAMP)
-	set authObj = ..Read(,.status,..#AuthorizationTimeout) // wait for package
-	set loginStatus = ##class(%SYSTEM.Security).Login(authObj.User,authObj.Password) // login user
-	quit loginStatus
+	Set status=..Write("Wait auth "_$ZDT($H))
+	Set authObj = ..Read(,.status,..#AuthorizationTimeout) // wait for package
+	Set loginStatus = ##class(%SYSTEM.Security).Login(authObj.User,authObj.Password) // login user
+	Quit loginStatus
 ]]></Implementation>
 </Method>
 
@@ -58,11 +58,11 @@ Closes connection if received incorrect json</Description>
 <FormalSpec><![CDATA[&len:%Integer=32656,&sc:%Status,timeout:%Integer=86400]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	set json = ##super(len, .sc, timeout)
-	do:$$$ISERR(sc) ..EndServer()
-	set st = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(json,,.obj,1)
-	do:$$$ISERR(st) ..EndServer()
-	quit obj
+	Set json = ##super(len, .sc, timeout)
+	Do:$$$ISERR(sc) ..EndServer()
+	Set st = ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(json,,.obj,1)
+	Do:$$$ISERR(st) ..EndServer()
+	Quit obj
 ]]></Implementation>
 </Method>
 
@@ -75,17 +75,16 @@ If <var>data</var> is string - wraps it as JSON { "Data" : data }.]]></Descripti
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	if $isobject(data) {
-		if data.%IsA("%ZEN.proxyObject") {
-			set data = ..OutputToStr(data,"%ToJSON")
-		} else {
-			set data = ..OutputToStr("%ZEN.Auxiliary.jsonProvider","%ObjectToJSON",data)					
+		If data.%IsA("%ZEN.proxyObject") {
+			Set data = ..OutputToStr(data,"%ToJSON")
+		} Else {
+			Set data = ..OutputToStr("%ZEN.Auxiliary.jsonProvider","%ObjectToJSON",data)					
 		}
-	} else {
+	} Else {
 		//#include %ZEN.Utils
 		Set data = "{""Data"":"""_$Replace(data,"\'","'")_"""}"
 	}
-	do ##super(data)
-	return 1
+	Quit ##super(data)
 ]]></Implementation>
 </Method>
 
@@ -96,14 +95,14 @@ Authenticates user, checks that he has required resource.
 If all goes well, initialises sensors and forwards users' input to Choose Action]]></Description>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	set status=..Write("Server start at "_$ZTIMESTAMP)
-	if $$$ISOK(..RequireAuthorization()) 
+	Set status=..Write("Server start at "_$ZDT($H))
+	If $$$ISOK(..RequireAuthorization()) 
 	{	
-		set status=..Write("Auth success at "_$ZTIMESTAMP)	
-		do ..ClientLoop()
-	} else {
-		set status=..EndServer()
-   		quit $$$OK					
+		Set status=..Write("Auth success at "_$ZDT($H))	
+		Do ..ClientLoop()
+	} Else {
+		Set status=..EndServer()
+   		Quit $$$OK					
 	}
 ]]></Implementation>
 </Method>
@@ -127,38 +126,38 @@ Execute singular action
 <FormalSpec>obj:%ZEN.proxyObject</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	set action =obj.Action
-	if action = "Echo" {
-		set st=..Write(obj.Arguments)
-	} elseif action = "SetVar" {
-		set st=..SetVar(obj.Arguments.Var, obj.Arguments.Val)
-	} elseif action = "GetVar" {
-		set st=..GetVar(obj.Arguments.Var)
-	} else {
-		set st=..Write("Unknown action")
+	Set action =obj.Action
+	If action = "Echo" {
+		Set st=..Write(obj.Arguments)
+	} Elseif action = "SetVar" {
+		Set st=..SetVar(obj.Arguments.Var, obj.Arguments.Val)
+	} Elseif action = "GetVar" {
+		Set st=..GetVar(obj.Arguments.Var)
+	} Else {
+		Set st=..Write("Unknown action")
 	}
-	quit st
+	Quit st
 ]]></Implementation>
 </Method>
 
 <Method name="SetVar">
 <Description><![CDATA[
-Set <var>Var</var> to <var>Val</var>]]></Description>
+Set <var>var</var> to <var>val</var>]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Var,Val</FormalSpec>
+<FormalSpec>var,val</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	Set @Var = Val
-	quit $$$OK
+	Set @var = val
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 
 <Method name="GetVar">
 <Description><![CDATA[
 Get <var>Var</var> value]]></Description>
-<FormalSpec>Var</FormalSpec>
+<FormalSpec>var</FormalSpec>
 <ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[	quit ..Write($g(@Var))
+<Implementation><![CDATA[	Quit ..Write($g(@var))
 ]]></Implementation>
 </Method>
 
@@ -169,47 +168,47 @@ pObj - OREF or class<br>
 pMethod - instance or class method to execute respectively<br>
 pArgs - additional arguments]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>pObj,pMethod,pArgs...</FormalSpec>
+<FormalSpec>obj,method,args...</FormalSpec>
 <ProcedureBlock>0</ProcedureBlock>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	set str=""
+	Set str=""
 
 	//Redirect IO to the current routine - makes use of the labels defined below
-	use $io::("^"_$ZNAME)
+	Use $io::("^"_$ZNAME)
 	
 	//Enable redirection
-	do ##class(%Device).ReDirectIO(1)
+	Do ##class(%Device).ReDirectIO(1)
 	
-	if $isobject(pObj) {
-		do $Method(pObj,pMethod,pArgs...)
-	} elseif $$$comClassDefined(pObj) {
-		do $ClassMethod(pObj,pMethod,pArgs...)
+	if $isobject(obj) {
+		Do $Method(obj,method,args...)
+	} elseif $$$comClassDefined(obj) {
+		Do $ClassMethod(obj,method,args...)
 	}
 	
     //Disable redirection
-    do ##class(%Device).ReDirectIO(0)
+    Do ##class(%Device).ReDirectIO(0)
 
-    quit str	  
+    Quit str	  
 
     //Labels that allow for IO redirection
-    //Read Character - we don't care about reading
+    //Read Character - we Don't care about reading
 rchr(c)      quit
-    //Read a string - we don't care about reading
+    //Read a string - we Don't care about reading
 rstr(sz,to)  quit
     //Write a character - call the output label
-wchr(s)      do output($char(s))  quit
+wchr(s)      Do output($char(s))  quit
     //Write a form feed - call the output label
-wff()        do output($char(12))  quit
+wff()        Do output($char(12))  quit
     //Write a newline - call the output label
-wnl()        do output($char(13,10))  quit
+wnl()        Do output($char(13,10))  quit
     //Write a string - call the output label
-wstr(s)      do output(s)  quit
+wstr(s)      Do output(s)  quit
     //Write a tab - call the output label
-wtab(s)      do output($char(9))  quit
-    //Output label - this is where you would handle what you actually want to do.
-    //  in our case, we want to write to str
-output(s)    set str=str_s   quit
+wtab(s)      Do output($char(9))  quit
+    //Output label - this is where you would handle what you actually want to Do.
+    //  in our case, we want to Write to str
+output(s)    Set str=str_s   quit
 ]]></Implementation>
 </Method>
 </Class>
