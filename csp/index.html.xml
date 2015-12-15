@@ -13,9 +13,9 @@
 				WebSocket:<br>
  				<input type="text" id="WebSocketId"  name="WebSocket" value="localhost:57772/csp/websocketssample/WebSockets.Main.cls"><br>
  				User:<br>
- 				<input type="text" id="UserId" name="User" value="dev"><br>
+ 				<input type="text" id="UserId" name="User" value="_SYSTEM"><br>
  				Password:<br>
- 				<input type="text" id="PasswordId" name="Password" value="123"><br>
+ 				<input type="text" id="PasswordId" name="Password" value="SYS"><br>
 				<input id="InitButton" type="button" value="Start WebSocket" onclick="InitSocket(WebSocketId.value, UserId.value, PasswordId.value);" />
 			</form>
 			<hr>
