@@ -3,7 +3,7 @@
 <CSP name="index.html" application="/csp/websocketssample/" default="1"><![CDATA[
 <html>
 	<head>
-	<title>WebSocket Sample</title>
+		<title>WebSocket Sample</title>
 		<script type="text/javascript" src="app.js"></script>
 	</head>
 
